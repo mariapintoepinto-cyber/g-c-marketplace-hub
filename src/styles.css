@@ -66,9 +66,6 @@
   --color-whatsapp: var(--whatsapp);
   --color-surface: var(--surface);
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --shadow-card: var(--shadow-card);
-  --shadow-card-hover: var(--shadow-card-hover);
-  --shadow-panel: var(--shadow-panel);
 }
 
 
@@ -164,4 +161,47 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+@utility card-elevated {
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-4px);
+  }
+}
+
+@utility panel-shadow {
+  box-shadow: var(--shadow-panel);
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.02em;
+  }
+}
+
+@keyframes gc-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@utility fade-up {
+  animation: gc-fade-up 0.6s ease both;
 }
