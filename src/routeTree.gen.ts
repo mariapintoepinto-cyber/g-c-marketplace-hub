@@ -10,33 +10,71 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CarrosRouteImport } from './routes/carros'
+import { Route as CasasRouteImport } from './routes/casas'
+import { Route as CarrosIdRouteImport } from './routes/carros.$id'
+import { Route as CasasIdRouteImport } from './routes/casas.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CarrosRoute = CarrosRouteImport.update({
+  id: '/carros',
+  path: '/carros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasasRoute = CasasRouteImport.update({
+  id: '/casas',
+  path: '/casas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarrosIdRoute = CarrosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CarrosRoute,
+} as any)
+const CasasIdRoute = CasasIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CasasRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/carros': typeof CarrosRouteWithChildren
+  '/casas': typeof CasasRouteWithChildren
+  '/carros/$id': typeof CarrosIdRoute
+  '/casas/$id': typeof CasasIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/carros': typeof CarrosRouteWithChildren
+  '/casas': typeof CasasRouteWithChildren
+  '/carros/$id': typeof CarrosIdRoute
+  '/casas/$id': typeof CasasIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/carros': typeof CarrosRouteWithChildren
+  '/casas': typeof CasasRouteWithChildren
+  '/carros/$id': typeof CarrosIdRoute
+  '/casas/$id': typeof CasasIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/carros' | '/casas' | '/carros/$id' | '/casas/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/carros' | '/casas' | '/carros/$id' | '/casas/$id'
+  id: '__root__' | '/' | '/carros' | '/casas' | '/carros/$id' | '/casas/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CarrosRoute: typeof CarrosRouteWithChildren
+  CasasRoute: typeof CasasRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +86,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/carros': {
+      id: '/carros'
+      path: '/carros'
+      fullPath: '/carros'
+      preLoaderRoute: typeof CarrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/casas': {
+      id: '/casas'
+      path: '/casas'
+      fullPath: '/casas'
+      preLoaderRoute: typeof CasasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carros/$id': {
+      id: '/carros/$id'
+      path: '/$id'
+      fullPath: '/carros/$id'
+      preLoaderRoute: typeof CarrosIdRouteImport
+      parentRoute: typeof CarrosRoute
+    }
+    '/casas/$id': {
+      id: '/casas/$id'
+      path: '/$id'
+      fullPath: '/casas/$id'
+      preLoaderRoute: typeof CasasIdRouteImport
+      parentRoute: typeof CasasRoute
+    }
   }
 }
 
+interface CarrosRouteChildren {
+  CarrosIdRoute: typeof CarrosIdRoute
+}
+
+const CarrosRouteChildren: CarrosRouteChildren = {
+  CarrosIdRoute: CarrosIdRoute,
+}
+
+const CarrosRouteWithChildren =
+  CarrosRoute._addFileChildren(CarrosRouteChildren)
+
+interface CasasRouteChildren {
+  CasasIdRoute: typeof CasasIdRoute
+}
+
+const CasasRouteChildren: CasasRouteChildren = {
+  CasasIdRoute: CasasIdRoute,
+}
+
+const CasasRouteWithChildren = CasasRoute._addFileChildren(CasasRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CarrosRoute: CarrosRouteWithChildren,
+  CasasRoute: CasasRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
