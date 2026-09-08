@@ -131,8 +131,6 @@ Detalhes do imóvel
 
 Anunciar
 
-Sobre Nós
-
 Contacto
 
 Entrar
@@ -153,7 +151,6 @@ Início
 Carros
 Casas
 Anunciar
-Sobre Nós
 Contacto
 
 On the right side:
@@ -654,8 +651,6 @@ Carros
 Casas
 
 Anunciar
-
-Sobre Nós
 
 Contacto
 
