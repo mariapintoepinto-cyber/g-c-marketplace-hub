@@ -10,14 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AnunciarRouteImport } from './routes/anunciar'
 import { Route as CarrosRouteImport } from './routes/carros'
 import { Route as CasasRouteImport } from './routes/casas'
+import { Route as ContactoRouteImport } from './routes/contacto'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
+import { Route as PainelRouteImport } from './routes/painel'
+import { Route as RegistarRouteImport } from './routes/registar'
+import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as CarrosIdRouteImport } from './routes/carros.$id'
 import { Route as CasasIdRouteImport } from './routes/casas.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnunciarRoute = AnunciarRouteImport.update({
+  id: '/anunciar',
+  path: '/anunciar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarrosRoute = CarrosRouteImport.update({
@@ -28,6 +40,36 @@ const CarrosRoute = CarrosRouteImport.update({
 const CasasRoute = CasasRouteImport.update({
   id: '/casas',
   path: '/casas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactoRoute = ContactoRouteImport.update({
+  id: '/contacto',
+  path: '/contacto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelRoute = PainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegistarRoute = RegistarRouteImport.update({
+  id: '/registar',
+  path: '/registar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SobreRoute = SobreRouteImport.update({
+  id: '/sobre',
+  path: '/sobre',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarrosIdRoute = CarrosIdRouteImport.update({
@@ -43,38 +85,103 @@ const CasasIdRoute = CasasIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/anunciar': typeof AnunciarRoute
   '/carros': typeof CarrosRouteWithChildren
   '/casas': typeof CasasRouteWithChildren
+  '/contacto': typeof ContactoRoute
+  '/entrar': typeof EntrarRoute
+  '/favoritos': typeof FavoritosRoute
+  '/painel': typeof PainelRoute
+  '/registar': typeof RegistarRoute
+  '/sobre': typeof SobreRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/anunciar': typeof AnunciarRoute
   '/carros': typeof CarrosRouteWithChildren
   '/casas': typeof CasasRouteWithChildren
+  '/contacto': typeof ContactoRoute
+  '/entrar': typeof EntrarRoute
+  '/favoritos': typeof FavoritosRoute
+  '/painel': typeof PainelRoute
+  '/registar': typeof RegistarRoute
+  '/sobre': typeof SobreRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/anunciar': typeof AnunciarRoute
   '/carros': typeof CarrosRouteWithChildren
   '/casas': typeof CasasRouteWithChildren
+  '/contacto': typeof ContactoRoute
+  '/entrar': typeof EntrarRoute
+  '/favoritos': typeof FavoritosRoute
+  '/painel': typeof PainelRoute
+  '/registar': typeof RegistarRoute
+  '/sobre': typeof SobreRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/carros' | '/casas' | '/carros/$id' | '/casas/$id'
+  fullPaths:
+    | '/'
+    | '/anunciar'
+    | '/carros'
+    | '/casas'
+    | '/contacto'
+    | '/entrar'
+    | '/favoritos'
+    | '/painel'
+    | '/registar'
+    | '/sobre'
+    | '/carros/$id'
+    | '/casas/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/carros' | '/casas' | '/carros/$id' | '/casas/$id'
-  id: '__root__' | '/' | '/carros' | '/casas' | '/carros/$id' | '/casas/$id'
+  to:
+    | '/'
+    | '/anunciar'
+    | '/carros'
+    | '/casas'
+    | '/contacto'
+    | '/entrar'
+    | '/favoritos'
+    | '/painel'
+    | '/registar'
+    | '/sobre'
+    | '/carros/$id'
+    | '/casas/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/anunciar'
+    | '/carros'
+    | '/casas'
+    | '/contacto'
+    | '/entrar'
+    | '/favoritos'
+    | '/painel'
+    | '/registar'
+    | '/sobre'
+    | '/carros/$id'
+    | '/casas/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnunciarRoute: typeof AnunciarRoute
   CarrosRoute: typeof CarrosRouteWithChildren
   CasasRoute: typeof CasasRouteWithChildren
+  ContactoRoute: typeof ContactoRoute
+  EntrarRoute: typeof EntrarRoute
+  FavoritosRoute: typeof FavoritosRoute
+  PainelRoute: typeof PainelRoute
+  RegistarRoute: typeof RegistarRoute
+  SobreRoute: typeof SobreRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -84,6 +191,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anunciar': {
+      id: '/anunciar'
+      path: '/anunciar'
+      fullPath: '/anunciar'
+      preLoaderRoute: typeof AnunciarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carros': {
@@ -98,6 +212,48 @@ declare module '@tanstack/react-router' {
       path: '/casas'
       fullPath: '/casas'
       preLoaderRoute: typeof CasasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contacto': {
+      id: '/contacto'
+      path: '/contacto'
+      fullPath: '/contacto'
+      preLoaderRoute: typeof ContactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel': {
+      id: '/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof PainelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/registar': {
+      id: '/registar'
+      path: '/registar'
+      fullPath: '/registar'
+      preLoaderRoute: typeof RegistarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sobre': {
+      id: '/sobre'
+      path: '/sobre'
+      fullPath: '/sobre'
+      preLoaderRoute: typeof SobreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carros/$id': {
@@ -140,8 +296,15 @@ const CasasRouteWithChildren = CasasRoute._addFileChildren(CasasRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnunciarRoute: AnunciarRoute,
   CarrosRoute: CarrosRouteWithChildren,
   CasasRoute: CasasRouteWithChildren,
+  ContactoRoute: ContactoRoute,
+  EntrarRoute: EntrarRoute,
+  FavoritosRoute: FavoritosRoute,
+  PainelRoute: PainelRoute,
+  RegistarRoute: RegistarRoute,
+  SobreRoute: SobreRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

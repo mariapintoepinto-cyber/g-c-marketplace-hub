@@ -9,6 +9,7 @@ const NAV = [
   { to: "/carros", label: "Carros" },
   { to: "/casas", label: "Casas" },
   { to: "/anunciar", label: "Anunciar" },
+  { to: "/sobre", label: "Sobre Nós" },
   { to: "/contacto", label: "Contacto" },
 ] as const;
 
@@ -54,7 +55,7 @@ export function Header() {
             className="hidden items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold text-white/85 transition-colors hover:text-white sm:flex"
           >
             <User className="h-5 w-5" />
-            <span className="hidden md:inline">{utilizador ? utilizador.nome : "Entrar / Registar"}</span>
+            <span className="hidden md:inline">{utilizador ? utilizador.nome : "Entrar"}</span>
           </Link>
 
           <Link
@@ -94,7 +95,7 @@ export function Header() {
                 onClick={() => setAberto(false)}
                 className="rounded-lg border border-white/15 px-4 py-2.5 text-center text-sm font-semibold text-white"
               >
-                {utilizador ? "A minha conta" : "Entrar / Registar"}
+                {utilizador ? "A minha conta" : "Entrar"}
               </Link>
               <Link
                 to="/anunciar"
