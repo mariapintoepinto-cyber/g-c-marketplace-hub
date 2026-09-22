@@ -96,8 +96,9 @@ export function LojaProvider({ children }: { children: ReactNode }) {
               apelido: profile?.last_name || "",
               telefone: profile?.phone || "",
               role: profile?.role || "user",
-              avatarUrl: profile?.avatar_url,
-              isVerified: profile?.is_verified,
+              avatarUrl: profile?.avatar_url ?? null,
+              isVerified: profile?.is_verified ?? false,
+
             };
             setUtilizador(userObj);
 
@@ -117,8 +118,9 @@ export function LojaProvider({ children }: { children: ReactNode }) {
                 apelido: p?.last_name || "",
                 telefone: p?.phone || "",
                 role: p?.role || "user",
-                avatarUrl: p?.avatar_url,
-                isVerified: p?.is_verified,
+                avatarUrl: p?.avatar_url ?? null,
+                isVerified: p?.is_verified ?? false,
+
               });
               const favs = await fetchUserFavoriteIds(session.user.id);
               setFavoritos(favs);
@@ -225,7 +227,7 @@ export function LojaProvider({ children }: { children: ReactNode }) {
       },
       registar: async ({ nome, apelido, email, telefone, palavraPasse }) => {
         if (isSupabaseConfigured && palavraPasse) {
-          const { error } = await signUp({ email, password: palavraPasse, nome, apelido, telefone });
+          const { error } = await signUp({ email, password: palavraPasse, nome, apelido: apelido ?? "", telefone: telefone ?? "" });
           if (error) {
             toast.error(error);
             return false;
@@ -251,10 +253,11 @@ export function LojaProvider({ children }: { children: ReactNode }) {
         if (!utilizador) return;
         if (isSupabaseConfigured) {
           await updateProfile(utilizador.id, {
-            first_name: novosDados.nome,
-            last_name: novosDados.apelido,
-            phone: novosDados.telefone,
+            first_name: novosDados.nome ?? utilizador.nome,
+            last_name: novosDados.apelido ?? utilizador.apelido,
+            phone: novosDados.telefone ?? utilizador.telefone,
           });
+
         }
         setUtilizador((prev) => {
           if (!prev) return null;
