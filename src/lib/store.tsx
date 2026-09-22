@@ -330,8 +330,27 @@ export function LojaProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>;
 }
 
+const LOJA_VAZIA: Loja = {
+  anuncios: ANUNCIOS,
+  favoritos: [],
+  utilizador: null,
+  mensagens: [],
+  carregandoAuth: true,
+  alternarFavorito: async () => {},
+  eFavorito: () => false,
+  entrar: async () => false,
+  registar: async () => false,
+  actualizarUtilizador: async () => {},
+  sair: async () => {},
+  criarAnuncio: () => "",
+  editarAnuncio: () => {},
+  actualizarEstado: () => {},
+  removerAnuncio: () => {},
+  marcarMensagemLida: () => {},
+};
+
 export function useLoja() {
-  const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useLoja precisa do LojaProvider");
-  return ctx;
+  // Fallback seguro: evita ecrã em branco se o contexto ainda não estiver disponível.
+  return useContext(Ctx) ?? LOJA_VAZIA;
 }
+
