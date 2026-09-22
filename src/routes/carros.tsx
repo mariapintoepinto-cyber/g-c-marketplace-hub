@@ -39,6 +39,7 @@ const TEXTOS = ["q", "local", "marca", "combustivel", "transmissao", "ordenar"] 
 const NUMEROS = ["faixa", "precoMin", "precoMax", "ano", "kmMax"] as const;
 
 export const Route = createFileRoute("/carros")({
+  staticData: { sitemap: true },
   validateSearch: (s: Record<string, unknown>): Busca => {
     const out: Record<string, string | number> = {};
     for (const k of TEXTOS) {

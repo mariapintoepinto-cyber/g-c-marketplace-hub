@@ -20,6 +20,7 @@ import { SITE, whatsappLink } from "@/lib/config";
 import { useLoja } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "G&C Solutions — Carros e Casas em Angola" },

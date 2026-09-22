@@ -19,6 +19,7 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as RegistarRouteImport } from './routes/registar'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as CarrosIdRouteImport } from './routes/carros.$id'
 import { Route as CasasIdRouteImport } from './routes/casas.$id'
@@ -73,6 +74,11 @@ const RegistarRoute = RegistarRouteImport.update({
   path: '/registar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/favoritos': typeof FavoritosRoute
   '/painel': typeof PainelRoute
   '/registar': typeof RegistarRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/favoritos': typeof FavoritosRoute
   '/painel': typeof PainelRoute
   '/registar': typeof RegistarRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/favoritos': typeof FavoritosRoute
   '/painel': typeof PainelRoute
   '/registar': typeof RegistarRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/painel'
     | '/registar'
+    | '/sitemap.xml'
     | '/sobre'
     | '/carros/$id'
     | '/casas/$id'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/painel'
     | '/registar'
+    | '/sitemap.xml'
     | '/sobre'
     | '/carros/$id'
     | '/casas/$id'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/painel'
     | '/registar'
+    | '/sitemap.xml'
     | '/sobre'
     | '/carros/$id'
     | '/casas/$id'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   FavoritosRoute: typeof FavoritosRoute
   PainelRoute: typeof PainelRoute
   RegistarRoute: typeof RegistarRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
 }
 
@@ -269,6 +282,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegistarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sobre': {
       id: '/sobre'
       path: '/sobre'
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritosRoute: FavoritosRoute,
   PainelRoute: PainelRoute,
   RegistarRoute: RegistarRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
 }
 export const routeTree = rootRouteImport

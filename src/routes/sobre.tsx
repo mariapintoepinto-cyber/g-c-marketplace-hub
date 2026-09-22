@@ -15,6 +15,7 @@ import ctaBg from "@/assets/cta-bg.jpg";
 import { SITE, whatsappLink } from "@/lib/config";
 
 export const Route = createFileRoute("/sobre")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Sobre Nós — G&C Solutions" },

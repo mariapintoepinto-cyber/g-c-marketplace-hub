@@ -3,6 +3,7 @@ import { DetailView } from "@/components/DetailView";
 import { useLoja } from "@/lib/store";
 
 export const Route = createFileRoute("/casas/$id")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Detalhes do imóvel — G&C Solutions" },

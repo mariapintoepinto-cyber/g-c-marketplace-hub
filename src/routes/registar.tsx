@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useLoja } from "@/lib/store";
 
 export const Route = createFileRoute("/registar")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Criar Conta Gratuita — G&C Solutions" },

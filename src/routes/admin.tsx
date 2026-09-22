@@ -50,6 +50,7 @@ import {
 } from "@/services/admin";
 
 export const Route = createFileRoute("/admin")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Painel de Administração — G&C Solutions" },

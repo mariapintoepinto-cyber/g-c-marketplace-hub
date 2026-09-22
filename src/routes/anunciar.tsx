@@ -26,6 +26,7 @@ import { useLoja } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/anunciar")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Publicar Anúncio — G&C Solutions" },
