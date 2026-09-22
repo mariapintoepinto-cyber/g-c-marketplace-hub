@@ -4,6 +4,7 @@ import { ListingCard } from "@/components/ListingCard";
 import { useLoja } from "@/lib/store";
 
 export const Route = createFileRoute("/favoritos")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Os Meus Favoritos — G&C Solutions" },

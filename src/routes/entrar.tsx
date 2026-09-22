@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useLoja } from "@/lib/store";
 
 export const Route = createFileRoute("/entrar")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Entrar na Conta — G&C Solutions" },

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { SITE, whatsappLink } from "@/lib/config";
 
 export const Route = createFileRoute("/contacto")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Contacto — G&C Solutions" },

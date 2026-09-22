@@ -33,6 +33,7 @@ import { useLoja } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/painel")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Painel do Utilizador — G&C Solutions" },
