@@ -117,9 +117,10 @@ function PaginaAdmin() {
       setLogs(listaLogs);
 
       const { data: settings } = await fetchSiteSettings();
-      if (settings.general) {
-        setDefinicoes((prev: any) => ({ ...prev, ...settings.general }));
+      if (settings['general']) {
+        setDefinicoes((prev: any) => ({ ...prev, ...settings['general'] }));
       }
+
     } catch (err) {
       console.error(err);
     } finally {

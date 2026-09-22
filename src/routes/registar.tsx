@@ -30,7 +30,7 @@ function PaginaRegistar() {
     confirmarPalavraPasse: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nome || !form.email || !form.telefone || !form.palavraPasse) {
       toast.error("Por favor preencha todos os campos obrigatórios.");
@@ -47,16 +47,19 @@ function PaginaRegistar() {
       return;
     }
 
-    registar({
+    const ok = await registar({
       nome: form.nome,
       apelido: form.apelido,
       email: form.email,
       telefone: form.telefone,
+      palavraPasse: form.palavraPasse,
     });
 
+    if (!ok) return;
     toast.success("Conta criada com sucesso! Bem-vindo à G&C Solutions.");
     navigate({ to: "/painel" });
   };
+
 
   if (utilizador) {
     return (

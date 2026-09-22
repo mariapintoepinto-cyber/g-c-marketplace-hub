@@ -8,33 +8,50 @@ import { useLoja } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 interface Busca {
-  q: string;
-  local: string;
-  faixa: number;
-  marca: string;
-  precoMin: number;
-  precoMax: number;
-  ano: number;
-  kmMax: number;
-  combustivel: string;
-  transmissao: string;
-  ordenar: string;
+  q?: string;
+  local?: string;
+  faixa?: number;
+  marca?: string;
+  precoMin?: number;
+  precoMax?: number;
+  ano?: number;
+  kmMax?: number;
+  combustivel?: string;
+  transmissao?: string;
+  ordenar?: string;
 }
 
+const VAZIO = {
+  q: "",
+  local: "Todas",
+  faixa: 0,
+  marca: "Todas",
+  precoMin: 0,
+  precoMax: 0,
+  ano: 0,
+  kmMax: 0,
+  combustivel: "Todos",
+  transmissao: "Todas",
+  ordenar: "recentes",
+};
+
+const TEXTOS = ["q", "local", "marca", "combustivel", "transmissao", "ordenar"] as const;
+const NUMEROS = ["faixa", "precoMin", "precoMax", "ano", "kmMax"] as const;
+
 export const Route = createFileRoute("/carros")({
-  validateSearch: (s: Record<string, unknown>): Busca => ({
-    q: (s.q as string) ?? "",
-    local: (s.local as string) ?? "Todas",
-    faixa: Number(s.faixa) || 0,
-    marca: (s.marca as string) ?? "Todas",
-    precoMin: Number(s.precoMin) || 0,
-    precoMax: Number(s.precoMax) || 0,
-    ano: Number(s.ano) || 0,
-    kmMax: Number(s.kmMax) || 0,
-    combustivel: (s.combustivel as string) ?? "Todos",
-    transmissao: (s.transmissao as string) ?? "Todas",
-    ordenar: (s.ordenar as string) ?? "recentes",
-  }),
+  validateSearch: (s: Record<string, unknown>): Busca => {
+    const out: Record<string, string | number> = {};
+    for (const k of TEXTOS) {
+      const v = s[k];
+      if (typeof v === "string" && v) out[k] = v;
+    }
+    for (const k of NUMEROS) {
+      const v = Number(s[k]);
+      if (Number.isFinite(v) && v > 0) out[k] = v;
+    }
+    return out as Busca;
+  },
+
   head: () => ({
     meta: [
       { title: "Carros à Venda em Angola — G&C Solutions" },

@@ -8,20 +8,20 @@ import { useLoja } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 interface Busca {
-  q: string;
-  local: string;
-  faixa: number;
-  tipo: string;
-  finalidade: string;
-  precoMin: number;
-  precoMax: number;
-  quartos: number;
-  casasBanho: number;
-  areaMin: number;
-  ordenar: string;
+  q?: string;
+  local?: string;
+  faixa?: number;
+  tipo?: string;
+  finalidade?: string;
+  precoMin?: number;
+  precoMax?: number;
+  quartos?: number;
+  casasBanho?: number;
+  areaMin?: number;
+  ordenar?: string;
 }
 
-const VAZIO: Busca = {
+const VAZIO = {
   q: "",
   local: "Todas",
   faixa: 0,
@@ -35,20 +35,23 @@ const VAZIO: Busca = {
   ordenar: "recentes",
 };
 
+const TEXTOS = ["q", "local", "tipo", "finalidade", "ordenar"] as const;
+const NUMEROS = ["faixa", "precoMin", "precoMax", "quartos", "casasBanho", "areaMin"] as const;
+
 export const Route = createFileRoute("/casas")({
-  validateSearch: (s: Record<string, unknown>): Busca => ({
-    q: (s.q as string) ?? "",
-    local: (s.local as string) ?? "Todas",
-    faixa: Number(s.faixa) || 0,
-    tipo: (s.tipo as string) ?? "Todos",
-    finalidade: (s.finalidade as string) ?? "Todas",
-    precoMin: Number(s.precoMin) || 0,
-    precoMax: Number(s.precoMax) || 0,
-    quartos: Number(s.quartos) || 0,
-    casasBanho: Number(s.casasBanho) || 0,
-    areaMin: Number(s.areaMin) || 0,
-    ordenar: (s.ordenar as string) ?? "recentes",
-  }),
+  validateSearch: (s: Record<string, unknown>): Busca => {
+    const out: Record<string, string | number> = {};
+    for (const k of TEXTOS) {
+      const v = s[k];
+      if (typeof v === "string" && v) out[k] = v;
+    }
+    for (const k of NUMEROS) {
+      const v = Number(s[k]);
+      if (Number.isFinite(v) && v > 0) out[k] = v;
+    }
+    return out as Busca;
+  },
+
   head: () => ({
     meta: [
       { title: "Casas e Imóveis em Angola — G&C Solutions" },

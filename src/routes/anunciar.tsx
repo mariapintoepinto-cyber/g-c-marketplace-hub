@@ -167,15 +167,16 @@ function PaginaAnunciar() {
 
   const moverImagem = (index: number, direcao: "cima" | "baixo") => {
     setImagens((prev) => {
-      const nova = [...prev];
       const targetIndex = direcao === "cima" ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= nova.length) return prev;
-      const temp = nova[index];
-      nova[index] = nova[targetIndex];
-      nova[targetIndex] = temp;
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+      const nova = [...prev];
+      const atual = nova[index] as string;
+      nova[index] = nova[targetIndex] as string;
+      nova[targetIndex] = atual;
       return nova;
     });
   };
+
 
   const adicionarCaract = () => {
     if (!novaCaracteristica.trim()) return;
@@ -237,7 +238,7 @@ function PaginaAnunciar() {
         title: titulo.trim(),
         description: descricao.trim() || `${titulo.trim()} em excelente estado e documentação em dia.`,
         price: Number(preco),
-        province,
+        province: provincia,
         neighborhood: bairro.trim(),
         features: caracteristicas,
         imageUrls: imagens,
@@ -249,9 +250,10 @@ function PaginaAnunciar() {
                 year: Number(ano),
                 mileage: Number(km) || 0,
                 fuelType: combustivel,
-                transmission,
+                transmission: transmissao,
                 driveType: tracao,
-                color,
+                color: cor,
+
               }
             : undefined,
         property:

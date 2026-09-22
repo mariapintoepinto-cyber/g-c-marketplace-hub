@@ -25,21 +25,19 @@ function PaginaEntrar() {
   const [modalEsqueci, setModalEsqueci] = useState(false);
   const [emailRecuperacao, setEmailRecuperacao] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !palavraPasse) {
       toast.error("Por favor introduza o seu email e palavra-passe.");
       return;
     }
 
-    const ok = entrar(email, palavraPasse);
+    const ok = await entrar(email, palavraPasse);
     if (ok) {
-      toast.success("Sessão iniciada com sucesso!");
       navigate({ to: "/painel" });
-    } else {
-      toast.error("Credenciais inválidas. Verifique os dados e tente novamente.");
     }
   };
+
 
   const handleRecuperacao = (e: React.FormEvent) => {
     e.preventDefault();
