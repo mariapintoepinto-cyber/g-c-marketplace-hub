@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Menu, PlusCircle, User, X } from "lucide-react";
+import { Heart, Menu, PlusCircle, Shield, User, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { useLoja } from "@/lib/store";
@@ -50,6 +50,16 @@ export function Header() {
             )}
           </Link>
 
+          {utilizador && (utilizador.role === "admin" || utilizador.role === "moderator") && (
+            <Link
+              to="/admin"
+              className="hidden items-center gap-1.5 rounded-full border border-gold/50 bg-navy-dark px-3 py-1.5 text-xs font-bold text-gold transition-colors hover:bg-gold hover:text-navy-dark sm:flex"
+            >
+              <Shield className="h-3.5 w-3.5" />
+              <span>Painel Admin</span>
+            </Link>
+          )}
+
           <Link
             to={utilizador ? "/painel" : "/entrar"}
             className="hidden items-center gap-2 rounded-full px-2 py-2 text-sm font-semibold text-white/85 transition-colors hover:text-white sm:flex"
@@ -90,6 +100,15 @@ export function Header() {
               </Link>
             ))}
             <div className="flex flex-col gap-2 py-3">
+              {utilizador && (utilizador.role === "admin" || utilizador.role === "moderator") && (
+                <Link
+                  to="/admin"
+                  onClick={() => setAberto(false)}
+                  className="rounded-lg border border-gold/50 bg-gold/10 px-4 py-2.5 text-center text-sm font-bold text-gold"
+                >
+                  Painel de Administração
+                </Link>
+              )}
               <Link
                 to={utilizador ? "/painel" : "/entrar"}
                 onClick={() => setAberto(false)}

@@ -82,9 +82,10 @@ function PaginaPainel() {
     (a) => a.userId === (utilizador?.id ?? "u-local") || a.userId === "u1",
   );
 
-  const activos = meusAnuncios.filter((a) => a.estado === "activo");
-  const vendidos = meusAnuncios.filter((a) => a.estado === "vendido");
-  const totalViews = meusAnuncios.reduce((acc, a) => acc + (a.visualizacoes || 0), 0);
+  const activos = meusAnuncios.filter((a) => a.estado === "activo" || (a as any).status === "published");
+  const pendentes = meusAnuncios.filter((a) => (a as any).estado === "pendente" || (a as any).status === "pending");
+  const vendidos = meusAnuncios.filter((a) => a.estado === "vendido" || (a as any).status === "sold");
+  const totalViews = meusAnuncios.reduce((acc, a) => acc + (a.visualizacoes || (a as any).views_count || 0), 0);
   const anunciosFavoritos = anuncios.filter((a) => favoritos.includes(a.id));
 
   const abrirEdicao = (a: Anuncio) => {
@@ -269,50 +270,42 @@ function PaginaPainel() {
             {/* ABA: VISÃO GERAL */}
             {aba === "visao-geral" && (
               <>
-                {/* 4 Cards de Estatísticas */}
-                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                  <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-muted-foreground">Anúncios Activos</span>
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-100 text-emerald-700">
-                        <ShoppingBag className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="mt-3 text-2xl font-extrabold text-navy">{activos.length}</p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">visíveis aos compradores</p>
+                {/* 6 Cards de Estatísticas */}
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                    <span className="text-xs font-bold text-muted-foreground">Meus Anúncios</span>
+                    <p className="mt-2 text-2xl font-extrabold text-navy">{meusAnuncios.length}</p>
+                    <span className="text-[10px] font-semibold text-navy/70">Total submetidos</span>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-muted-foreground">Anúncios Vendidos</span>
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue-100 text-blue-700">
-                        <CheckCircle className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="mt-3 text-2xl font-extrabold text-navy">{vendidos.length}</p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">negócios concluídos</p>
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
+                    <span className="text-xs font-bold text-emerald-800">Publicados</span>
+                    <p className="mt-2 text-2xl font-extrabold text-emerald-700">{activos.length}</p>
+                    <span className="text-[10px] font-semibold text-emerald-600">Visíveis no site</span>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-muted-foreground">Total Visualizações</span>
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-amber-100 text-amber-700">
-                        <Eye className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="mt-3 text-2xl font-extrabold text-navy">{totalViews.toLocaleString("pt-PT")}</p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">alcance acumulado</p>
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-4 shadow-sm">
+                    <span className="text-xs font-bold text-amber-800">Pendentes</span>
+                    <p className="mt-2 text-2xl font-extrabold text-amber-700">{pendentes.length}</p>
+                    <span className="text-[10px] font-semibold text-amber-600">Em moderação</span>
                   </div>
 
-                  <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-muted-foreground">Favoritos Guardados</span>
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-rose-100 text-rose-700">
-                        <Heart className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="mt-3 text-2xl font-extrabold text-navy">{favoritos.length}</p>
-                    <p className="mt-1 text-[11px] text-muted-foreground">veículos e imóveis salvos</p>
+                  <div className="rounded-2xl border border-blue-200 bg-blue-50/40 p-4 shadow-sm">
+                    <span className="text-xs font-bold text-blue-800">Vendidos</span>
+                    <p className="mt-2 text-2xl font-extrabold text-blue-700">{vendidos.length}</p>
+                    <span className="text-[10px] font-semibold text-blue-600">Negócios fechados</span>
+                  </div>
+
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm">
+                    <span className="text-xs font-bold text-rose-800">Favoritos</span>
+                    <p className="mt-2 text-2xl font-extrabold text-rose-700">{favoritos.length}</p>
+                    <span className="text-[10px] font-semibold text-rose-600">Itens guardados</span>
+                  </div>
+
+                  <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                    <span className="text-xs font-bold text-muted-foreground">Visualizações</span>
+                    <p className="mt-2 text-2xl font-extrabold text-navy">{totalViews.toLocaleString("pt-PT")}</p>
+                    <span className="text-[10px] font-semibold text-muted-foreground">Total acumulado</span>
                   </div>
                 </div>
 

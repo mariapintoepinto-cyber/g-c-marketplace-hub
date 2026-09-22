@@ -1,17 +1,22 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, Phone } from "lucide-react";
-import { useState } from "react";
+import { Eye, Heart, MessageCircle, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Anuncio } from "@/data/listings";
 import { SITE, whatsappLink } from "@/lib/config";
 import { formatKm, formatPreco } from "@/lib/format";
 import { useLoja } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { incrementListingViews } from "@/services/listings";
 
 export function DetailView({ anuncio }: { anuncio: Anuncio }) {
   const [activa, setActiva] = useState(0);
   const { alternarFavorito, eFavorito } = useLoja();
   const favorito = eFavorito(anuncio.id);
   const carro = anuncio.categoria === "carro";
+
+  useEffect(() => {
+    incrementListingViews(anuncio.id);
+  }, [anuncio.id]);
 
   const info: [string, string][] = carro && anuncio.veiculo
     ? [
@@ -115,6 +120,9 @@ export function DetailView({ anuncio }: { anuncio: Anuncio }) {
             </p>
             <p className="mt-3 text-3xl font-extrabold text-navy">
               {formatPreco(anuncio.preco, anuncio.imovel?.finalidade)}
+            </p>
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Eye className="h-3.5 w-3.5 text-navy/60" /> {anuncio.visualizacoes?.toLocaleString("pt-PT") || 0} visualizações
             </p>
 
             <div className="mt-5 flex flex-col gap-2">

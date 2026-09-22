@@ -1,6 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { ANUNCIOS, type Anuncio, type Estado } from "@/data/listings";
+import { isSupabaseConfigured, supabase, type ProfileRecord, type UserRole } from "@/lib/supabase";
+import { signIn, signOut, signUp, updateProfile, getProfile } from "@/services/auth";
+import { fetchUserFavoriteIds, toggleFavoriteInDb } from "@/services/favorites";
 
 export interface Utilizador {
   id: string;
@@ -8,6 +11,9 @@ export interface Utilizador {
   apelido: string;
   email: string;
   telefone: string;
+  role: UserRole;
+  avatarUrl?: string | null;
+  isVerified?: boolean;
 }
 
 export interface Mensagem {
@@ -46,12 +52,13 @@ interface Loja {
   favoritos: string[];
   utilizador: Utilizador | null;
   mensagens: Mensagem[];
-  alternarFavorito: (id: string) => void;
+  carregandoAuth: boolean;
+  alternarFavorito: (id: string) => Promise<void>;
   eFavorito: (id: string) => boolean;
-  entrar: (email: string, palavraPasse?: string) => boolean;
-  registar: (dados: Omit<Utilizador, "id">) => void;
-  actualizarUtilizador: (dados: Partial<Utilizador>) => void;
-  sair: () => void;
+  entrar: (email: string, palavraPasse?: string) => Promise<boolean>;
+  registar: (dados: { nome: string; apelido?: string; email: string; telefone?: string; palavraPasse?: string }) => Promise<boolean>;
+  actualizarUtilizador: (dados: Partial<Utilizador>) => Promise<void>;
+  sair: () => Promise<void>;
   criarAnuncio: (a: Omit<Anuncio, "id" | "userId" | "criadoEm" | "visualizacoes" | "estado">) => string;
   editarAnuncio: (id: string, dados: Partial<Anuncio>) => void;
   actualizarEstado: (id: string, estado: Estado) => void;
@@ -70,20 +77,82 @@ export function LojaProvider({ children }: { children: ReactNode }) {
   const [favoritos, setFavoritos] = useState<string[]>([]);
   const [utilizador, setUtilizador] = useState<Utilizador | null>(null);
   const [mensagens, setMensagens] = useState<Mensagem[]>(MENSAGENS_EXEMPLO);
+  const [carregandoAuth, setCarregandoAuth] = useState(true);
 
+  // Sincronização inicial com Supabase ou LocalStorage
   useEffect(() => {
-    try {
-      const f = localStorage.getItem(CHAVE_FAV);
-      if (f) setFavoritos(JSON.parse(f));
-      const u = localStorage.getItem(CHAVE_USER);
-      if (u) setUtilizador(JSON.parse(u));
-      const a = localStorage.getItem(CHAVE_ANUNCIOS);
-      if (a) setAnuncios([...(JSON.parse(a) as Anuncio[]), ...ANUNCIOS]);
-      const m = localStorage.getItem(CHAVE_MSG);
-      if (m) setMensagens(JSON.parse(m));
-    } catch {
-      /* ignorar */
+    let unsubscribe = () => {};
+
+    async function initAuth() {
+      if (isSupabaseConfigured) {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session?.user) {
+            const profile = await getProfile(data.session.user.id);
+            const userObj: Utilizador = {
+              id: data.session.user.id,
+              email: data.session.user.email || "",
+              nome: profile?.first_name || profile?.full_name?.split(" ")[0] || "Utilizador",
+              apelido: profile?.last_name || "",
+              telefone: profile?.phone || "",
+              role: profile?.role || "user",
+              avatarUrl: profile?.avatar_url,
+              isVerified: profile?.is_verified,
+            };
+            setUtilizador(userObj);
+
+            // Carrega favoritos do banco
+            const userFavs = await fetchUserFavoriteIds(data.session.user.id);
+            setFavoritos(userFavs);
+          }
+
+          // Listener de mudanças na sessão
+          const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session?.user) {
+              const p = await getProfile(session.user.id);
+              setUtilizador({
+                id: session.user.id,
+                email: session.user.email || "",
+                nome: p?.first_name || p?.full_name?.split(" ")[0] || "Utilizador",
+                apelido: p?.last_name || "",
+                telefone: p?.phone || "",
+                role: p?.role || "user",
+                avatarUrl: p?.avatar_url,
+                isVerified: p?.is_verified,
+              });
+              const favs = await fetchUserFavoriteIds(session.user.id);
+              setFavoritos(favs);
+            } else if (event === "SIGNED_OUT") {
+              setUtilizador(null);
+              setFavoritos([]);
+            }
+          });
+          unsubscribe = () => authListener.subscription.unsubscribe();
+        } catch (err) {
+          console.error("Erro na inicialização de autenticação:", err);
+        } finally {
+          setCarregandoAuth(false);
+        }
+      } else {
+        // Fallback local
+        try {
+          const f = localStorage.getItem(CHAVE_FAV);
+          if (f) setFavoritos(JSON.parse(f));
+          const u = localStorage.getItem(CHAVE_USER);
+          if (u) setUtilizador(JSON.parse(u));
+          const a = localStorage.getItem(CHAVE_ANUNCIOS);
+          if (a) setAnuncios([...(JSON.parse(a) as Anuncio[]), ...ANUNCIOS]);
+          const m = localStorage.getItem(CHAVE_MSG);
+          if (m) setMensagens(JSON.parse(m));
+        } catch {
+          /* ignorar */
+        }
+        setCarregandoAuth(false);
+      }
     }
+
+    initAuth();
+    return () => unsubscribe();
   }, []);
 
   const guardarProprios = useCallback((lista: Anuncio[]) => {
@@ -96,17 +165,24 @@ export function LojaProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const alternarFavorito = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (!utilizador) {
-        toast.error("Precisa de entrar na sua conta para guardar favoritos.");
+        toast.error("Inicie sessão para adicionar aos favoritos.");
         return;
       }
-      setFavoritos((prev) => {
-        const novo = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
-        localStorage.setItem(CHAVE_FAV, JSON.stringify(novo));
-        toast.success(prev.includes(id) ? "Removido dos favoritos." : "Adicionado aos favoritos.");
-        return novo;
-      });
+
+      if (isSupabaseConfigured) {
+        const isNowFav = await toggleFavoriteInDb(utilizador.id, id);
+        setFavoritos((prev) => (isNowFav ? [...prev, id] : prev.filter((x) => x !== id)));
+        toast.success(isNowFav ? "Adicionado aos favoritos." : "Removido dos favoritos.");
+      } else {
+        setFavoritos((prev) => {
+          const novo = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+          localStorage.setItem(CHAVE_FAV, JSON.stringify(novo));
+          toast.success(prev.includes(id) ? "Removido dos favoritos." : "Adicionado aos favoritos.");
+          return novo;
+        });
+      }
     },
     [utilizador],
   );
@@ -117,27 +193,69 @@ export function LojaProvider({ children }: { children: ReactNode }) {
       favoritos,
       utilizador,
       mensagens,
+      carregandoAuth,
       alternarFavorito,
       eFavorito: (id) => favoritos.includes(id),
-      entrar: (email) => {
+      entrar: async (email, palavraPasse) => {
         if (!email) return false;
+        if (isSupabaseConfigured && palavraPasse) {
+          const { error } = await signIn(email, palavraPasse);
+          if (error) {
+            toast.error(error);
+            return false;
+          }
+          toast.success("Sessão iniciada com sucesso!");
+          return true;
+        }
+
+        // Modo Demonstração / Fallback
+        const demoRole: UserRole = email.includes("admin") ? "admin" : "user";
         const u: Utilizador = {
           id: "u-local",
           nome: email.split("@")[0] ?? "Utilizador",
           apelido: "",
           email,
           telefone: "+244 925 000 000",
+          role: demoRole,
+          isVerified: true,
         };
         setUtilizador(u);
         localStorage.setItem(CHAVE_USER, JSON.stringify(u));
         return true;
       },
-      registar: (dados) => {
-        const u: Utilizador = { id: "u-local", ...dados };
+      registar: async ({ nome, apelido, email, telefone, palavraPasse }) => {
+        if (isSupabaseConfigured && palavraPasse) {
+          const { error } = await signUp({ email, password: palavraPasse, nome, apelido, telefone });
+          if (error) {
+            toast.error(error);
+            return false;
+          }
+          toast.success("Conta criada com sucesso!");
+          return true;
+        }
+
+        const u: Utilizador = {
+          id: "u-local",
+          nome,
+          apelido: apelido || "",
+          email,
+          telefone: telefone || "+244 925 000 000",
+          role: "user",
+          isVerified: false,
+        };
         setUtilizador(u);
         localStorage.setItem(CHAVE_USER, JSON.stringify(u));
+        return true;
       },
-      actualizarUtilizador: (novosDados) => {
+      actualizarUtilizador: async (novosDados) => {
+        if (!utilizador) return;
+        if (isSupabaseConfigured) {
+          await updateProfile(utilizador.id, {
+            first_name: novosDados.nome,
+            last_name: novosDados.apelido,
+            phone: novosDados.telefone,
+          });
+        }
         setUtilizador((prev) => {
           if (!prev) return null;
           const u = { ...prev, ...novosDados };
@@ -146,9 +264,13 @@ export function LojaProvider({ children }: { children: ReactNode }) {
           return u;
         });
       },
-      sair: () => {
+      sair: async () => {
+        if (isSupabaseConfigured) {
+          await signOut();
+        }
         setUtilizador(null);
         localStorage.removeItem(CHAVE_USER);
+        toast.success("Sessão terminada.");
       },
       criarAnuncio: (dados) => {
         const id = `n${Date.now()}`;
@@ -199,7 +321,7 @@ export function LojaProvider({ children }: { children: ReactNode }) {
         });
       },
     }),
-    [anuncios, favoritos, utilizador, mensagens, alternarFavorito, guardarProprios, guardarMensagens],
+    [anuncios, favoritos, utilizador, mensagens, carregandoAuth, alternarFavorito, guardarProprios, guardarMensagens],
   );
 
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>;

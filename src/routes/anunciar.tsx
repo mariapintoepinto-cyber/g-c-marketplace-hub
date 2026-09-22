@@ -19,6 +19,9 @@ import carPrado from "@/assets/car-prado.jpg";
 import casaT3 from "@/assets/house-moradia-t3.jpg";
 import { MARCAS, PROVINCIAS, type Categoria } from "@/data/listings";
 import { formatPreco } from "@/lib/format";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { createListing, uploadListingPhoto } from "@/services/listings";
+import { createNotification } from "@/services/notifications";
 import { useLoja } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -186,7 +189,7 @@ function PaginaAnunciar() {
     setCaracteristicas(caracteristicas.filter((c) => c !== item));
   };
 
-  const publicarAnuncio = () => {
+  const publicarAnuncio = async () => {
     const dados = {
       categoria,
       titulo: titulo.trim(),
@@ -226,8 +229,56 @@ function PaginaAnunciar() {
           }),
     };
 
-    const id = criarAnuncio(dados);
-    toast.success("Parabéns! O seu anúncio foi publicado com sucesso na G&C Solutions.");
+    if (isSupabaseConfigured && utilizador) {
+      await createListing({
+        userId: utilizador.id,
+        category: categoria === "carro" ? "vehicle" : "property",
+        listingType: categoria === "imovel" && finalidade === "Arrendamento" ? "rent" : "sale",
+        title: titulo.trim(),
+        description: descricao.trim() || `${titulo.trim()} em excelente estado e documentação em dia.`,
+        price: Number(preco),
+        province,
+        neighborhood: bairro.trim(),
+        features: caracteristicas,
+        imageUrls: imagens,
+        vehicle:
+          categoria === "carro"
+            ? {
+                brand: marca,
+                model: modelo.trim() || titulo,
+                year: Number(ano),
+                mileage: Number(km) || 0,
+                fuelType: combustivel,
+                transmission,
+                driveType: tracao,
+                color,
+              }
+            : undefined,
+        property:
+          categoria === "imovel"
+            ? {
+                propertyType: tipoImovel,
+                bedrooms: Number(quartos),
+                bathrooms: Number(casasBanho),
+                area: Number(area) || 120,
+                parkingSpaces: Number(estacionamento),
+                furnished: false,
+                condominium: false,
+              }
+            : undefined,
+      });
+
+      await createNotification(
+        utilizador.id,
+        "Anúncio enviado para aprovação",
+        `O seu anúncio "${titulo.trim()}" foi submetido com sucesso e está a ser revisto pela nossa equipa de moderação.`,
+        "info",
+      );
+    } else {
+      criarAnuncio(dados);
+    }
+
+    toast.success("O seu anúncio foi enviado para aprovação.");
     navigate({ to: "/painel" });
   };
 
