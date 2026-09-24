@@ -199,54 +199,33 @@ export function LojaProvider({ children }: { children: ReactNode }) {
       alternarFavorito,
       eFavorito: (id) => favoritos.includes(id),
       entrar: async (email, palavraPasse) => {
-        if (!email) return false;
-        if (isSupabaseConfigured && palavraPasse) {
-          const { error } = await signIn(email, palavraPasse);
-          if (error) {
-            toast.error(error);
-            return false;
-          }
-          toast.success("Sessão iniciada com sucesso!");
-          return true;
+        if (!email || !palavraPasse) {
+          toast.error("Indique o email e a palavra-passe.");
+          return false;
         }
-
-        // Modo Demonstração / Fallback
-        const demoRole: UserRole = email.includes("admin") ? "admin" : "user";
-        const u: Utilizador = {
-          id: "u-local",
-          nome: email.split("@")[0] ?? "Utilizador",
-          apelido: "",
-          email,
-          telefone: "+244 925 000 000",
-          role: demoRole,
-          isVerified: true,
-        };
-        setUtilizador(u);
-        localStorage.setItem(CHAVE_USER, JSON.stringify(u));
+        const { error } = await signIn(email, palavraPasse);
+        if (error) {
+          toast.error(error);
+          return false;
+        }
+        toast.success("Sessão iniciada com sucesso!");
         return true;
       },
       registar: async ({ nome, apelido, email, telefone, palavraPasse }) => {
-        if (isSupabaseConfigured && palavraPasse) {
-          const { error } = await signUp({ email, password: palavraPasse, nome, apelido: apelido ?? "", telefone: telefone ?? "" });
-          if (error) {
-            toast.error(error);
-            return false;
-          }
-          toast.success("Conta criada com sucesso!");
-          return true;
+        if (!palavraPasse) {
+          toast.error("Indique uma palavra-passe.");
+          return false;
         }
-
-        const u: Utilizador = {
-          id: "u-local",
-          nome,
-          apelido: apelido || "",
-          email,
-          telefone: telefone || "+244 925 000 000",
-          role: "user",
-          isVerified: false,
-        };
-        setUtilizador(u);
-        localStorage.setItem(CHAVE_USER, JSON.stringify(u));
+        const { data, error } = await signUp({ email, password: palavraPasse, nome, apelido: apelido ?? "", telefone: telefone ?? "" });
+        if (error) {
+          toast.error(error);
+          return false;
+        }
+        if (!data?.session) {
+          toast.success("Conta criada! Verifique o seu email para confirmar a conta antes de entrar.");
+          return false;
+        }
+        toast.success("Conta criada com sucesso!");
         return true;
       },
       actualizarUtilizador: async (novosDados) => {

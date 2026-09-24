@@ -1,31 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
+import { supabase as generatedClient } from "@/integrations/supabase/client";
 
-// Credenciais lidas a partir de variáveis de ambiente do Vite
-const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'] || "";
-const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'] || "";
-
-
-// Verificação de configuração do cliente
-export const isSupabaseConfigured = Boolean(
-  supabaseUrl &&
-    supabaseAnonKey &&
-    supabaseUrl !== "https://seu-projeto.supabase.co" &&
-    !supabaseUrl.includes("seu-projeto"),
-);
-
-// Cliente Supabase com persistência de sessão no localStorage
-export const supabase = createClient(
-  isSupabaseConfigured ? supabaseUrl : "https://placeholder-gc.supabase.co",
-  isSupabaseConfigured ? supabaseAnonKey : "placeholder-anon-key",
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storage: typeof window !== "undefined" ? window.localStorage : undefined,
-    },
-  },
-);
+// Contas reais: sempre ligado à base de dados
+export const isSupabaseConfigured = true;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const supabase = generatedClient as any;
 
 // =================================================================
 // Tipos TypeScript para o Banco de Dados do Supabase
