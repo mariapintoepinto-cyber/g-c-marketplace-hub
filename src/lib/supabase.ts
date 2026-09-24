@@ -1,9 +1,10 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase as generatedClient } from "@/integrations/supabase/client";
 
 // Contas reais: sempre ligado à base de dados
 export const isSupabaseConfigured = true;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const supabase = generatedClient as any;
+export const supabase = generatedClient as unknown as SupabaseClient<any>;
 
 // =================================================================
 // Tipos TypeScript para o Banco de Dados do Supabase
