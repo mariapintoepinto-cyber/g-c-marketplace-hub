@@ -21,6 +21,7 @@ import { Route as PainelRouteImport } from './routes/painel'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as RegistarRouteImport } from './routes/registar'
 import { Route as RegrasRouteImport } from './routes/regras'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as CarrosIdRouteImport } from './routes/carros.$id'
@@ -86,6 +87,11 @@ const RegrasRoute = RegrasRouteImport.update({
   path: '/regras',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/registar': typeof RegistarRoute
   '/regras': typeof RegrasRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/carros/$id': typeof CarrosIdRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/registar': typeof RegistarRoute
   '/regras': typeof RegrasRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/carros/$id': typeof CarrosIdRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/registar': typeof RegistarRoute
   '/regras': typeof RegrasRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sobre': typeof SobreRoute
   '/termos': typeof TermosRoute
   '/carros/$id': typeof CarrosIdRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/registar'
     | '/regras'
+    | '/sitemap.xml'
     | '/sobre'
     | '/termos'
     | '/carros/$id'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/registar'
     | '/regras'
+    | '/sitemap.xml'
     | '/sobre'
     | '/termos'
     | '/carros/$id'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/registar'
     | '/regras'
+    | '/sitemap.xml'
     | '/sobre'
     | '/termos'
     | '/carros/$id'
@@ -232,6 +244,7 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   RegistarRoute: typeof RegistarRoute
   RegrasRoute: typeof RegrasRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SobreRoute: typeof SobreRoute
   TermosRoute: typeof TermosRoute
 }
@@ -322,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegrasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sobre': {
       id: '/sobre'
       path: '/sobre'
@@ -387,6 +407,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   RegistarRoute: RegistarRoute,
   RegrasRoute: RegrasRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SobreRoute: SobreRoute,
   TermosRoute: TermosRoute,
 }
