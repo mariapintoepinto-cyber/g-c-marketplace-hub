@@ -12,6 +12,12 @@ const NAV = [
   { to: "/contacto", label: "Contacto" },
 ] as const;
 
+const LEGAL = [
+  { to: "/termos", label: "Termos e Condições" },
+  { to: "/privacidade", label: "Política de Privacidade" },
+  { to: "/regras", label: "Regras e Segurança" },
+] as const;
+
 export function Footer() {
   return (
     <footer className="bg-navy-dark">
@@ -47,9 +53,22 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="mt-8 border-t border-white/10 pt-6 text-center text-xs text-white/55 lg:text-right">
-          © 2026 {SITE.nome}. Todos os direitos reservados.
-        </p>
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-xs text-white/55 sm:flex-row">
+          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+            {LEGAL.map((i) => (
+              <Link
+                key={i.to}
+                to={i.to}
+                className="transition-colors hover:text-gold"
+              >
+                {i.label}
+              </Link>
+            ))}
+          </nav>
+          <p className="text-center sm:text-right">
+            © 2026 {SITE.nome}. Todos os direitos reservados.
+          </p>
+        </div>
       </div>
     </footer>
   );

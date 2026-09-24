@@ -1,5 +1,84 @@
 import { supabase, isSupabaseConfigured, type ListingRecord } from "@/lib/supabase";
-import { ANUNCIOS, type Anuncio } from "@/data/listings";
+import { ANUNCIOS, type Anuncio, type Estado } from "@/data/listings";
+import carPrado from "@/assets/car-prado.jpg";
+import casaT3 from "@/assets/house-moradia-t3.jpg";
+
+export function mapSupabaseListingToAnuncio(row: any): Anuncio {
+  const isVehicle = row.category === "vehicle";
+  const vehicleData = Array.isArray(row.vehicles) ? row.vehicles[0] : row.vehicles;
+  const propertyData = Array.isArray(row.properties) ? row.properties[0] : row.properties;
+
+  let imagens: string[] = [];
+  if (Array.isArray(row.listing_images) && row.listing_images.length > 0) {
+    imagens = [...row.listing_images]
+      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+      .map((img: any) => img.image_url)
+      .filter(Boolean);
+  }
+  if (imagens.length === 0) {
+    imagens = [isVehicle ? carPrado : casaT3];
+  }
+
+  const profile = row.profiles;
+  const vendedor = {
+    nome:
+      profile?.full_name ||
+      (profile?.first_name ? `${profile.first_name} ${profile.last_name || ""}`.trim() : "Vendedor G&C"),
+    telefone: profile?.phone || "+244 925 649 926",
+    tipo: profile?.role === "dealer" ? "Stand Profissional" : "Vendedor verificado",
+  };
+
+  const estado: Estado =
+    row.status === "published" ? "activo" : row.status === "sold" ? "vendido" : "pausado";
+
+  const veiculo =
+    isVehicle && vehicleData
+      ? {
+          marca: vehicleData.brand || "Toyota",
+          modelo: vehicleData.model || row.title,
+          ano: Number(vehicleData.year) || 2021,
+          quilometragem: Number(vehicleData.mileage) || 0,
+          combustivel: (vehicleData.fuel_type || "Gasolina") as any,
+          transmissao: (vehicleData.transmission || "Automática") as any,
+          tracao: vehicleData.drive_type || "4x2",
+          cor: vehicleData.color || "Branco",
+        }
+      : undefined;
+
+  const imovel =
+    !isVehicle && propertyData
+      ? {
+          tipo: (propertyData.property_type || "Moradia") as any,
+          quartos: Number(propertyData.bedrooms) || 0,
+          casasBanho: Number(propertyData.bathrooms) || 0,
+          area: Number(propertyData.area_m2) || 120,
+          finalidade: (row.listing_type === "rent" ? "Arrendamento" : "Venda") as any,
+          estacionamento: Number(propertyData.parking_spaces) || 0,
+        }
+      : undefined;
+
+  return {
+    id: row.id,
+    userId: row.user_id || "u-local",
+    categoria: isVehicle ? "carro" : "imovel",
+    titulo: row.title || "",
+    descricao: row.description || "",
+    preco: Number(row.price) || 0,
+    bairro: row.neighborhood || "Talatona",
+    provincia: row.province || "Luanda",
+    estado,
+    visualizacoes: Number(row.views_count) || 0,
+    criadoEm: row.created_at
+      ? new Date(row.created_at).toISOString().slice(0, 10)
+      : new Date().toISOString().slice(0, 10),
+    imagens,
+    vendedor,
+    veiculo,
+    imovel,
+    caracteristicas: Array.isArray(row.features) ? row.features : [],
+    destaque: Boolean(row.featured),
+  };
+}
 
 export interface ListingFilterOptions {
   category?: "vehicle" | "property";
@@ -63,12 +142,38 @@ export async function fetchListings(options: ListingFilterOptions = {}) {
     if (maxPrice && maxPrice > 0) {
       resultado = resultado.filter((a) => a.preco <= maxPrice);
     }
+    if (brand && brand !== "Todas") {
+      resultado = resultado.filter((a) => a.veiculo?.marca === brand);
+    }
+    if (fuelType && fuelType !== "Todos") {
+      resultado = resultado.filter((a) => a.veiculo?.combustivel === fuelType);
+    }
+    if (transmission && transmission !== "Todas") {
+      resultado = resultado.filter((a) => a.veiculo?.transmissao === transmission);
+    }
+    if (propertyType && propertyType !== "Todos") {
+      resultado = resultado.filter((a) => a.imovel?.tipo === propertyType);
+    }
+    if (listingType) {
+      const fin = listingType === "rent" ? "Arrendamento" : "Venda";
+      resultado = resultado.filter((a) => a.imovel?.finalidade === fin);
+    }
     if (query) {
       const q = query.toLowerCase();
       resultado = resultado.filter(
         (a) => a.titulo.toLowerCase().includes(q) || a.descricao.toLowerCase().includes(q),
       );
     }
+    if (featured !== undefined) {
+      // All dummy listings or first few can count as featured
+      resultado = resultado.slice(0, 4);
+    }
+
+    // Ordenação
+    if (sortBy === "menor-preco") resultado.sort((a, b) => a.preco - b.preco);
+    else if (sortBy === "maior-preco") resultado.sort((a, b) => b.preco - a.preco);
+    else if (sortBy === "mais-vistos") resultado.sort((a, b) => b.visualizacoes - a.visualizacoes);
+
     return { data: resultado, count: resultado.length, error: null };
   }
 
@@ -152,7 +257,8 @@ export async function fetchListings(options: ListingFilterOptions = {}) {
     return { data: [], count: 0, error: error.message };
   }
 
-  return { data: (data as any[]) || [], count: count || 0, error: null };
+  const listings: Anuncio[] = (data || []).map(mapSupabaseListingToAnuncio);
+  return { data: listings, count: count || listings.length, error: null };
 }
 
 export async function fetchListingByIdOrSlug(identifier: string) {
@@ -189,7 +295,13 @@ export async function fetchListingByIdOrSlug(identifier: string) {
     return { data: null, error: error.message };
   }
 
-  return { data, error: null };
+  if (!data) {
+    // Tenta fallback com anúncios em cache/seed se não encontrado
+    const fallback = ANUNCIOS.find((item) => item.id === identifier);
+    return { data: fallback || null, error: null };
+  }
+
+  return { data: mapSupabaseListingToAnuncio(data), error: null };
 }
 
 export async function uploadListingPhoto(userId: string, file: File): Promise<{ url: string; path: string } | null> {

@@ -18,9 +18,11 @@ import { Route as ContactoRouteImport } from './routes/contacto'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as PainelRouteImport } from './routes/painel'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as RegistarRouteImport } from './routes/registar'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RegrasRouteImport } from './routes/regras'
 import { Route as SobreRouteImport } from './routes/sobre'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as CarrosIdRouteImport } from './routes/carros.$id'
 import { Route as CasasIdRouteImport } from './routes/casas.$id'
 
@@ -69,19 +71,29 @@ const PainelRoute = PainelRouteImport.update({
   path: '/painel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegistarRoute = RegistarRouteImport.update({
   id: '/registar',
   path: '/registar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const RegrasRoute = RegrasRouteImport.update({
+  id: '/regras',
+  path: '/regras',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
   path: '/sobre',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CarrosIdRoute = CarrosIdRouteImport.update({
@@ -105,9 +117,11 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/favoritos': typeof FavoritosRoute
   '/painel': typeof PainelRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/registar': typeof RegistarRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/regras': typeof RegrasRoute
   '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
 }
@@ -121,9 +135,11 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/favoritos': typeof FavoritosRoute
   '/painel': typeof PainelRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/registar': typeof RegistarRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/regras': typeof RegrasRoute
   '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
 }
@@ -138,9 +154,11 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/favoritos': typeof FavoritosRoute
   '/painel': typeof PainelRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/registar': typeof RegistarRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/regras': typeof RegrasRoute
   '/sobre': typeof SobreRoute
+  '/termos': typeof TermosRoute
   '/carros/$id': typeof CarrosIdRoute
   '/casas/$id': typeof CasasIdRoute
 }
@@ -156,9 +174,11 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/favoritos'
     | '/painel'
+    | '/privacidade'
     | '/registar'
-    | '/sitemap.xml'
+    | '/regras'
     | '/sobre'
+    | '/termos'
     | '/carros/$id'
     | '/casas/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -172,9 +192,11 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/favoritos'
     | '/painel'
+    | '/privacidade'
     | '/registar'
-    | '/sitemap.xml'
+    | '/regras'
     | '/sobre'
+    | '/termos'
     | '/carros/$id'
     | '/casas/$id'
   id:
@@ -188,9 +210,11 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/favoritos'
     | '/painel'
+    | '/privacidade'
     | '/registar'
-    | '/sitemap.xml'
+    | '/regras'
     | '/sobre'
+    | '/termos'
     | '/carros/$id'
     | '/casas/$id'
   fileRoutesById: FileRoutesById
@@ -205,9 +229,11 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   FavoritosRoute: typeof FavoritosRoute
   PainelRoute: typeof PainelRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   RegistarRoute: typeof RegistarRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  RegrasRoute: typeof RegrasRoute
   SobreRoute: typeof SobreRoute
+  TermosRoute: typeof TermosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -275,6 +301,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/registar': {
       id: '/registar'
       path: '/registar'
@@ -282,11 +315,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegistarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
+    '/regras': {
+      id: '/regras'
+      path: '/regras'
+      fullPath: '/regras'
+      preLoaderRoute: typeof RegrasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sobre': {
@@ -294,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/sobre'
       fullPath: '/sobre'
       preLoaderRoute: typeof SobreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/carros/$id': {
@@ -344,9 +384,11 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   FavoritosRoute: FavoritosRoute,
   PainelRoute: PainelRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   RegistarRoute: RegistarRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  RegrasRoute: RegrasRoute,
   SobreRoute: SobreRoute,
+  TermosRoute: TermosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

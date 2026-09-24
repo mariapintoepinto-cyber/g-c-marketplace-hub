@@ -4,6 +4,7 @@ import { ANUNCIOS, type Anuncio, type Estado } from "@/data/listings";
 import { isSupabaseConfigured, supabase, type ProfileRecord, type UserRole } from "@/lib/supabase";
 import { signIn, signOut, signUp, updateProfile, getProfile } from "@/services/auth";
 import { fetchUserFavoriteIds, toggleFavoriteInDb } from "@/services/favorites";
+import { fetchListings } from "@/services/listings";
 
 export interface Utilizador {
   id: string;
@@ -53,6 +54,7 @@ interface Loja {
   utilizador: Utilizador | null;
   mensagens: Mensagem[];
   carregandoAuth: boolean;
+  recarregarAnuncios: () => Promise<void>;
   alternarFavorito: (id: string) => Promise<void>;
   eFavorito: (id: string) => boolean;
   entrar: (email: string, palavraPasse?: string) => Promise<boolean>;
@@ -79,6 +81,19 @@ export function LojaProvider({ children }: { children: ReactNode }) {
   const [mensagens, setMensagens] = useState<Mensagem[]>(MENSAGENS_EXEMPLO);
   const [carregandoAuth, setCarregandoAuth] = useState(true);
 
+  const recarregarAnuncios = useCallback(async () => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data: dbListings } = await fetchListings({ status: "published", pageSize: 50 });
+        if (dbListings && dbListings.length > 0) {
+          setAnuncios(dbListings);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar anúncios do Supabase:", err);
+      }
+    }
+  }, []);
+
   // Sincronização inicial com Supabase ou LocalStorage
   useEffect(() => {
     let unsubscribe = () => {};
@@ -86,6 +101,9 @@ export function LojaProvider({ children }: { children: ReactNode }) {
     async function initAuth() {
       if (isSupabaseConfigured) {
         try {
+          // Carrega anúncios publicados reais do banco
+          await recarregarAnuncios();
+
           const { data } = await supabase.auth.getSession();
           if (data.session?.user) {
             const profile = await getProfile(data.session.user.id);
@@ -254,6 +272,7 @@ export function LojaProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem(CHAVE_USER);
         toast.success("Sessão terminada.");
       },
+      recarregarAnuncios,
       criarAnuncio: (dados) => {
         const id = `n${Date.now()}`;
         const novo: Anuncio = {
@@ -277,9 +296,16 @@ export function LojaProvider({ children }: { children: ReactNode }) {
           guardarProprios(lista);
           return lista;
         });
+        if (isSupabaseConfigured) {
+          const updatePayload: any = {};
+          if (alteracoes.titulo) updatePayload.title = alteracoes.titulo;
+          if (alteracoes.preco) updatePayload.price = alteracoes.preco;
+          if (alteracoes.descricao) updatePayload.description = alteracoes.descricao;
+          supabase.from("listings").update(updatePayload).eq("id", id).then();
+        }
         toast.success("Anúncio atualizado com sucesso!");
       },
-      actualizarEstado: (id, estado) =>
+      actualizarEstado: (id, estado) => {
         setAnuncios((prev) => {
           const lista = prev.map((a) => (a.id === id ? { ...a, estado } : a));
           guardarProprios(lista);
@@ -287,14 +313,23 @@ export function LojaProvider({ children }: { children: ReactNode }) {
             estado === "activo" ? "ativado" : estado === "vendido" ? "marcado como vendido" : "pausado";
           toast.success(`Anúncio ${estadoMsg} com sucesso.`);
           return lista;
-        }),
-      removerAnuncio: (id) =>
+        });
+        if (isSupabaseConfigured) {
+          const dbStatus = estado === "activo" ? "published" : estado === "vendido" ? "sold" : "paused";
+          supabase.from("listings").update({ status: dbStatus }).eq("id", id).then();
+        }
+      },
+      removerAnuncio: (id) => {
         setAnuncios((prev) => {
           const lista = prev.filter((a) => a.id !== id);
           guardarProprios(lista);
           toast.success("Anúncio removido.");
           return lista;
-        }),
+        });
+        if (isSupabaseConfigured) {
+          supabase.from("listings").delete().eq("id", id).then();
+        }
+      },
       marcarMensagemLida: (id) => {
         setMensagens((prev) => {
           const actualizadas = prev.map((m) => (m.id === id ? { ...m, lida: true } : m));
@@ -303,7 +338,7 @@ export function LojaProvider({ children }: { children: ReactNode }) {
         });
       },
     }),
-    [anuncios, favoritos, utilizador, mensagens, carregandoAuth, alternarFavorito, guardarProprios, guardarMensagens],
+    [anuncios, favoritos, utilizador, mensagens, carregandoAuth, alternarFavorito, guardarProprios, guardarMensagens, recarregarAnuncios],
   );
 
   return <Ctx.Provider value={valor}>{children}</Ctx.Provider>;
