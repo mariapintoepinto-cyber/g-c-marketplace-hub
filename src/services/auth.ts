@@ -13,10 +13,6 @@ export async function signUp({
   apelido?: string;
   telefone?: string;
 }) {
-  if (!isSupabaseConfigured) {
-    // Fallback local caso Supabase ainda não esteja ligado com chaves reais
-    return { data: { user: { id: "u-local", email } }, error: null };
-  }
 
   const fullName = `${nome} ${apelido || ""}`.trim();
   const { data, error } = await supabase.auth.signUp({
