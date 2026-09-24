@@ -159,9 +159,21 @@ RETURNS BOOLEAN AS $$
 $$ LANGUAGE sql SECURITY DEFINER;
 
 -- Trigger para criar perfil automaticamente aquando do registo no Supabase Auth
+-- O primeiro utilizador a registar-se na plataforma torna-se ADMINISTRADOR automaticamente!
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  profile_count integer;
+  assigned_role public.user_role;
 BEGIN
+  -- Se for o primeiro registo na base de dados, atribui papel de 'admin' automaticamente
+  SELECT count(*) INTO profile_count FROM public.profiles;
+  IF profile_count = 0 THEN
+    assigned_role := 'admin';
+  ELSE
+    assigned_role := 'user';
+  END IF;
+
   INSERT INTO public.profiles (
     id,
     email,
@@ -169,16 +181,18 @@ BEGIN
     first_name,
     last_name,
     phone,
-    role
+    role,
+    is_verified
   )
   VALUES (
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'nome', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'first_name', NEW.raw_user_meta_data->>'nome', ''),
+    COALESCE(NEW.raw_user_meta_data->>'first_name', NEW.raw_user_meta_data->>'nome', split_part(NEW.email, '@', 1)),
     COALESCE(NEW.raw_user_meta_data->>'last_name', NEW.raw_user_meta_data->>'apelido', ''),
     COALESCE(NEW.raw_user_meta_data->>'phone', NEW.raw_user_meta_data->>'telefone', ''),
-    'user'
+    assigned_role,
+    CASE WHEN assigned_role = 'admin' THEN true ELSE false END
   )
   ON CONFLICT (id) DO UPDATE
   SET email = EXCLUDED.email,
