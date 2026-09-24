@@ -13,10 +13,6 @@ export async function signUp({
   apelido?: string;
   telefone?: string;
 }) {
-  if (!isSupabaseConfigured) {
-    // Fallback local caso Supabase ainda não esteja ligado com chaves reais
-    return { data: { user: { id: "u-local", email } }, error: null };
-  }
 
   const fullName = `${nome} ${apelido || ""}`.trim();
   const { data, error } = await supabase.auth.signUp({
@@ -33,43 +29,26 @@ export async function signUp({
   });
 
   if (error) {
-    console.error("Erro no registo Supabase:", error);
-    return { data: null, error: error.message };
+    return { data: null, error: traduzirErro(error.message) };
   }
-
-  // Tenta criar/assegurar o perfil se o utilizador foi criado
-  if (data.user) {
-    await supabase.from("profiles").upsert({
-      id: data.user.id,
-      email,
-      full_name: fullName,
-      first_name: nome,
-      last_name: apelido || "",
-      phone: telefone || "",
-      role: "user",
-      is_active: true,
-      updated_at: new Date().toISOString(),
-    });
-  }
-
   return { data, error: null };
 }
 
+export function traduzirErro(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes("invalid login")) return "Email ou palavra-passe incorrectos.";
+  if (m.includes("email not confirmed")) return "Confirme o seu email antes de entrar. Verifique a sua caixa de correio.";
+  if (m.includes("already registered") || m.includes("already exists")) return "Já existe uma conta com este email.";
+  if (m.includes("password")) return "A palavra-passe não cumpre os requisitos (mínimo 6 caracteres).";
+  if (m.includes("rate limit")) return "Demasiadas tentativas. Tente novamente mais tarde.";
+  return "Ocorreu um erro. Tente novamente.";
+}
+
 export async function signIn(email: string, password: string) {
-  if (!isSupabaseConfigured) {
-    return { data: { user: { id: "u-local", email } }, error: null };
-  }
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    console.error("Erro no login Supabase:", error);
-    return { data: null, error: error.message };
+    return { data: null, error: traduzirErro(error.message) };
   }
-
   return { data, error: null };
 }
 
@@ -92,20 +71,20 @@ export async function resetPassword(email: string) {
 }
 
 export async function getProfile(userId: string): Promise<ProfileRecord | null> {
-  if (!isSupabaseConfigured) {
-    return null;
-  }
   const { data, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", userId)
-    .single();
-
+    .maybeSingle();
   if (error) {
     console.error("Erro ao obter perfil:", error);
     return null;
   }
-  return data as ProfileRecord;
+  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const lista = ((roles ?? []) as { role: string }[]).map((r) => r.role);
+  const role = lista.includes("admin") ? "admin" : lista.includes("moderator") ? "moderator" : "user";
+  if (!data) return null;
+  return { ...(data as ProfileRecord), role } as ProfileRecord;
 }
 
 export async function updateProfile(userId: string, updates: Partial<ProfileRecord>) {
