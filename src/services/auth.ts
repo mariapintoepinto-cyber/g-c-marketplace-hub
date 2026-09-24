@@ -19,6 +19,7 @@ export async function signUp({
     email,
     password,
     options: {
+      emailRedirectTo: `${window.location.origin}/entrar`,
       data: {
         nome,
         apelido: apelido || "",

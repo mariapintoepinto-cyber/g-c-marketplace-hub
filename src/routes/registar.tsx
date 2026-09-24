@@ -56,11 +56,51 @@ function PaginaRegistar() {
       palavraPasse: form.palavraPasse,
     });
 
-    if (!ok) return;
-    toast.success("Conta criada com sucesso! Bem-vindo à G&C Solutions.");
+    if (!ok) {
+      setEmailEnviado(form.email);
+      return;
+    }
     navigate({ to: "/painel" });
   };
 
+  const [emailEnviado, setEmailEnviado] = useState<string | null>(null);
+  const [aEnviar, setAEnviar] = useState(false);
+
+  if (emailEnviado && !utilizador) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center bg-surface px-4 py-12">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gold/15 text-gold-strong">
+            <ShieldCheck className="h-7 w-7" />
+          </div>
+          <h1 className="mt-4 text-xl font-extrabold text-navy">Confirme o seu email</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Enviámos um link de confirmação para <strong className="text-navy">{emailEnviado}</strong>.
+            Abra o email e clique no link para activar a conta. Se não o encontrar, verifique a pasta de spam.
+          </p>
+          <div className="mt-6 flex flex-col gap-2">
+            <Link to="/entrar" className="inline-flex items-center justify-center rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-navy-dark hover:bg-gold-strong">
+              Já confirmei — Entrar
+            </Link>
+            <button
+              type="button"
+              disabled={aEnviar}
+              onClick={async () => {
+                setAEnviar(true);
+                const { error } = await supabase.auth.resend({ type: "signup", email: emailEnviado, options: { emailRedirectTo: `${window.location.origin}/entrar` } });
+                setAEnviar(false);
+                if (error) toast.error("Não foi possível reenviar. Aguarde um minuto e tente novamente.");
+                else toast.success("Email de confirmação reenviado.");
+              }}
+              className="text-sm font-semibold text-navy underline disabled:opacity-50"
+            >
+              Reenviar email de confirmação
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (utilizador) {
     return (
